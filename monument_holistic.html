@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0c14; color: #e8eaf0; padding: 20px; font-size: 12px; }
+
+h1 { font-size: 16px; font-weight: 800; margin-bottom: 2px; }
+.sub { font-size: 11px; color: #555; margin-bottom: 16px; }
+
+/* NAV */
+.tabs { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 16px; }
+.tab { padding: 6px 13px; border-radius: 16px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #1e2235; background: #12151f; color: #666; transition: all 0.15s; }
+.tab.active { background: #2d4ef5; border-color: #2d4ef5; color: #fff; }
+
+.scene { display: none; }
+.scene.active { display: block; }
+
+/* ── MASTER FLOW ── */
+.master { display: flex; flex-direction: column; gap: 0; }
+
+.phase { border-radius: 12px; margin-bottom: 10px; overflow: hidden; border: 1px solid #1e2235; }
+.phase-header { padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.phase-header .ph-icon { font-size: 18px; }
+.phase-header .ph-text { flex: 1; }
+.phase-header .ph-title { font-size: 13px; font-weight: 700; }
+.phase-header .ph-sub { font-size: 10px; color: #8a8fa8; margin-top: 1px; }
+.phase-header .ph-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 8px; }
+.phase-body { padding: 0 14px 14px 14px; display: none; }
+.phase-body.open { display: block; }
+
+/* swimlane inside phase */
+.lanes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+.lane { background: #0d1020; border-radius: 8px; padding: 10px; border: 1px solid #1e2235; }
+.lane-title { font-size: 10px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.lane-item { font-size: 11px; color: #c0c4d8; margin-bottom: 5px; padding-left: 10px; position: relative; line-height: 1.4; }
+.lane-item::before { content: '→'; position: absolute; left: 0; color: #2d4ef5; font-size: 10px; }
+.lane-item.warn::before { color: #f5a623; content: '⚠'; }
+.lane-item.risk::before { color: #ff4444; content: '✗'; }
+.lane-item.ok::before { color: #3ddc84; content: '✓'; }
+
+/* dependency map */
+.dep-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.dep-card { background: #0d1020; border-radius: 10px; padding: 12px; border: 1px solid #1e2235; }
+.dep-card .dc-title { font-size: 12px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.dep-card .dc-row { font-size: 11px; color: #8a8fa8; margin-bottom: 4px; padding-left: 12px; position: relative; line-height: 1.4; }
+.dep-card .dc-row::before { content: '·'; position: absolute; left: 3px; color: #2d4ef5; font-weight: 700; }
+.dep-card .dc-row.critical { color: #ff6b6b; }
+.dep-card .dc-row.critical::before { content: '!'; color: #ff4444; }
+
+/* risk matrix */
+.risk-matrix { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.risk-row { display: flex; align-items: center; gap: 10px; }
+.risk-label { width: 160px; flex-shrink: 0; font-size: 11px; color: #c0c4d8; }
+.risk-bar-wrap { flex: 1; background: #0d1020; border-radius: 4px; height: 20px; overflow: hidden; }
+.risk-bar { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 10px; font-weight: 700; color: #fff; transition: width 0.5s; }
+.risk-tag { width: 60px; text-align: right; font-size: 10px; font-weight: 700; }
+
+/* version map */
+.ver-table { margin-top: 10px; width: 100%; border-collapse: collapse; }
+.ver-table th { background: #0d1020; font-size: 10px; font-weight: 700; color: #555; text-transform: uppercase; padding: 7px 10px; text-align: left; border-bottom: 1px solid #1e2235; }
+.ver-table td { padding: 7px 10px; font-size: 11px; color: #c0c4d8; border-bottom: 1px solid #0d1020; vertical-align: top; }
+.ver-table tr:hover td { background: #0d1020; }
+.vtag { display: inline-block; padding: 1px 7px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+.v-active { background: #0b2a18; color: #3ddc84; border: 1px solid #1a5030; }
+.v-disabled { background: #1e1e1e; color: #555; border: 1px solid #2a2a2a; }
+.v-warn { background: #2a1e00; color: #ffcc00; border: 1px solid #5a4200; }
+
+/* implications */
+.impl-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+.impl-card { background: #0d1020; border-radius: 10px; padding: 12px; border-top: 3px solid; }
+.impl-card .ic-title { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+.impl-card .ic-item { font-size: 11px; color: #8a8fa8; margin-bottom: 5px; line-height: 1.4; padding-left: 10px; position: relative; }
+.impl-card .ic-item::before { content: '→'; position: absolute; left: 0; color: inherit; opacity: 0.6; }
+
+/* toggle arrow */
+.arrow { font-size: 10px; color: #555; transition: transform 0.2s; }
+.arrow.open { transform: rotate(90deg); }
+
+/* color tokens */
+.c-blue { color: #64b5f6; } .c-green { color: #3ddc84; } .c-yellow { color: #ffcc00; } .c-red { color: #ff6b6b; } .c-purple { color: #ce93d8; } .c-orange { color: #ffb74d; }
+.ph-acq { background: #0d1530; border-color: #1a2560; }
+.ph-bind { background: #0d2018; border-color: #1a4030; }
+.ph-auth { background: #1a1000; border-color: #3a2800; }
+.ph-serv { background: #180d30; border-color: #301a60; }
+.ph-ms { background: #0d1818; border-color: #1a3030; }
+</style>
+</head>
+<body>
+
+<h1>🏦 Monument Bank - End to End Journey Analysis</h1>
+<p class="sub">Holistic view: business flow, dependencies, risks, versioning strategy</p>
+
+<div class="tabs">
+  <div class="tab active" onclick="show('flow', this)">🗺 Master Flow</div>
+  <div class="tab" onclick="show('deps', this)">🔗 Dependencies</div>
+  <div class="tab" onclick="show('versions', this)">📦 Version Strategy</div>
+  <div class="tab" onclick="show('risks', this)">⚠️ Risk Map</div>
+  <div class="tab" onclick="show('impl', this)">💡 Implications</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- MASTER FLOW -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="scene active" id="flow">
+  <p style="color:#555; font-size:11px; margin-bottom:10px;">Click each phase to expand. Read top to bottom - this is the real end-to-end sequence.</p>
+
+  <!-- PHASE 1 -->
+  <div class="phase ph-acq">
+    <div class="phase-header" onclick="toggle('p1')">
+      <div class="ph-icon">📥</div>
+      <div class="ph-text">
+        <div class="ph-title c-blue">Phase 1 - Acquisition (Anonymous)</div>
+        <div class="ph-sub">User has no account. No device bound. Journeys: emailExists → otpVerifyPhone → createMSParty</div>
+      </div>
+      <span class="ph-tag" style="background:#0d1530; color:#64b5f6; border:1px solid #1a2560;">ANONYMOUS</span>
+      <span class="arrow" id="p1-arrow">▶</span>
+    </div>
+    <div class="phase-body" id="p1">
+      <div class="lanes">
+        <div class="lane">
+          <div class="lane-title">User does</div>
+          <div class="lane-item">Enters email</div>
+          <div class="lane-item">Receives & enters SMS OTP</div>
+          <div class="lane-item">Fills registration form (name, DOB, address, tax, account)</div>
+          <div class="lane-item">Confirms details on review screen</div>
+        </div>
+        <div class="lane">
+          <div class="lane-title">System does</div>
+          <div class="lane-item">SF lookup: does email exist as partyId?</div>
+          <div class="lane-item">Creates CSM token (15-min TTL) to chain steps</div>
+          <div class="lane-item ok">RiskID check on actionToken before each critical step</div>
+          <div class="lane-item">SF_CREATE_MEMBERSHIP_PARTY called with all form data</div>
+          <div class="lane-item ok">partyId returned - permanent identity established</div>
+          <div class="lane-item">Email verification link sent (NA106 notification)</div>
+        </div>
+        <div class="lane">
+          <div class="lane-title">Failure modes</div>
+          <div class="lane-item risk">Duplicate email → hard stop, shown info screen</div>
+          <div class="lane-item risk">RiskID DENY → silent hard stop</div>
+          <div class="lane-item warn">SF create party fails (non-200) → error info shown, reject</div>
+          <div class="lane-item warn">CSM mismatch (email/phone don't match token) → reject</div>
+          <div class="lane-item warn">OTP expires (2 min) → must restart OTP step</div>
+        </div>
+      </div>
+      <div style="margin-top:10px; background:#0d1020; border-radius:8px; padding:10px; font-size:11px; color:#8a8fa8; line-height:1.6;">
+        <strong style="color:#fff;">Key handoff:</strong> The CSM (cross-session message) is the spine of this phase. It's created in <em>emailExists</em>, consumed and re-issued in <em>otpVerifyPhone</em> (now carrying verified phone too), then consumed again in <em>createMSParty</em>. Each step can only proceed if it holds the correct token - this prevents step-skipping attacks. <span style="color:#ffcc00;">If any step fails, the whole chain must restart.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase ph-bind">
+    <div class="phase-header" onclick="toggle('p2')">
+      <div class="ph-icon">📱</div>
+      <div class="ph-text">
+        <div class="ph-title c-green">Phase 2 - Device Binding</div>
+        <div class="ph-sub">User exists. Device is new. Journey: default_bind (4 versions)</div>
+      </div>
+      <span class="ph-tag" style="background:#0b2a18; color:#3ddc84; border:1px solid #1a5030;">BIND</span>
+      <span class="arrow" id="p2-arrow">▶</span>
+    </div>
+    <div class="phase-body" id="p2">
+      <div class="lanes">
+        <div class="lane">
+          <div class="lane-title">User does</div>
+          <div class="lane-item">Opens app on new/fresh device</div>
+          <div class="lane-item">Approves on existing device (push) OR enters SMS OTP (if no old device)</div>
+          <div class="lane-item">Creates PIN on new device</div>
+          <div class="lane-item">Optionally sets up biometrics</div>
+        </div>
+        <div class="lane">
+          <div class="lane-title">System does</div>
+          <div class="lane-item ok">Jailbreak / root check first (hard gate)</div>
+          <div class="lane-item">Routes to correct version via filter_criteria params</div>
+          <div class="lane-item">SF lookup: get partyId for this user</div>
+          <div class="lane-item">SF_Get_party_details: fetch phone for OTP fallback</div>
+          <div class="lane-item ok">Adds device to device group ee356f85</div>
+          <div class="lane-item ok">Stores partyId in user custom_data</div>
+        </div>
+        <div class="lane">
+          <div class="lane-title">Failure modes</div>
+          <div class="lane-item risk">Jailbroken device → hard stop, reason: jail_broken_device</div>
+          <div class="lane-item risk">RiskID DENY (v: bind_withriskid) → hard stop</div>
+          <div class="lane-item warn">No bound devices + no old device → OTP fallback path</div>
+          <div class="lane-item warn">email_not_found in SF → reject</div>
+          <div class="lane-item warn">PIN lock (5 failures in 30min) → 30-min device lockout</div>
+        </div>
+      </div>
+      <div style="margin-top:10px; background:#0d1020; border-radius:8px; padding:10px; font-size:11px; color:#8a8fa8; line-height:1.6;">
+        <strong style="color:#fff;">Version routing logic:</strong> The bind journey has 4 active versions selected by <em>filter_criteria</em> on request params. <span style="color:#64b5f6;">bindViaPinAndPartyDetails</span> = v8 MSR (skips all checks, just registers PIN + sets custom_data). <span style="color:#64b5f6;">RiskID param present</span> = risk-gated bind. <span style="color:#64b5f6;">nextRelease=v7.0</span> = v7 flow. <span style="color:#64b5f6;">Default</span> = original flow. The mobile app controls which version fires by what params it sends.
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase ph-auth">
+    <div class="phase-header" onclick="toggle('p3')">
+      <div class="ph-icon">🔓</div>
+      <div class="ph-text">
+        <div class="ph-title c-yellow">Phase 3 - Authentication (Login)</div>
+        <div class="ph-sub">Device is bound. User returns. Journey: Login (2 versions: v3 disabled, login_lite active)</div>
+      </div>
+      <span class="ph-tag" style="background:#2a1e00; color:#ffcc00; border:1px solid #5a4200;">AUTH</span>
+      <span class="arrow" id="p3-arrow">▶</span>
+    </div>
+    <div class="phase-body" id="p3">
+      <div class="lanes">
+        <div class="lane">
+          <div class="lane-title">User does</div>
+          <div class="lane-item">Opens app</div>
+          <div class="lane-item">Biometrics or PIN (whichever is default)</div>
+          <div class="lane-item">Optionally: "Forgotten PIN" → SMS OTP → reset PIN</div>
+          <div class="lane-item">Optionally: memorable word check (if memorableWordSet=true)</div>
+        </div>
+        <div class="lane">
+          <div class="lane-title">System does</div>
+          <div class="lane-item">Loads user custom_data (emailVerified, marketingPreferenceSubmitted, etc.)</div>
+          <div class="lane-item">If partyId exists → SF_Get_party_details to refresh user state</div>
+          <div class="lane-item">SF_Memorable_Word_State_Check if partyId exists</div>
+          <div class="lane-item ok">Sends userData JSON to app (all flags for routing)</div>
+          <div class="lane-item ok">Enriches token with partyId claim</div>
+          <div class="lane-item">Registration check: device in group OR partyId not null</div>
+          <div class="lane-item">If applicationSubmitted=false → returns registrationData</div>
+        </div>
+        <div class="lane">
+          <div class="lane-title">Failure modes</div>
+          <div class="lane-item warn">Device not in group AND partyId null → redirect to Registration</div>
+          <div class="lane-item warn">emailVerified=false → app handles (not blocked at journey level)</div>
+          <div class="lane-item risk">5 wrong PINs → 30-min lockout</div>
+          <div class="lane-item warn">Forgotten PIN: OTP loop max 5 iterations</div>
+          <div class="lane-item risk">SF unreachable → partyId not enriched in token</div>
+        </div>
+      </div>
+      <div style="margin-top:10px; background:#0d1020; border-radius:8px; padding:10px; font-size:11px; color:#8a8fa8; line-height:1.6;">
+        <strong style="color:#fff;">login_lite vs v3:</strong> v3 is disabled. login_lite is active. The only real difference: login_lite hardcodes <em>memorableWordSet: true</em> in the userData JSON regardless of actual state. <span style="color:#ffcc00;">This means the memorable word check is bypassed at the journey level and pushed to the app to decide.</span> Worth flagging as a potential discrepancy between journey truth and app truth.
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 4 -->
+  <div class="phase ph-serv">
+    <div class="phase-header" onclick="toggle('p4')">
+      <div class="ph-icon">⚙️</div>
+      <div class="ph-text">
+        <div class="ph-title c-purple">Phase 4 - Servicing (Post-Login)</div>
+        <div class="ph-sub">User is authenticated. Journeys: Registration, CompleteIdv, update-phone, submit-application, store-applicationID, resend-email-verification</div>
+      </div>
+      <span class="ph-tag" style="background:#180d30; color:#ce93d8; border:1px solid #301a60;">SERVICING</span>
+      <span class="arrow" id="p4-arrow">▶</span>
+    </div>
+    <div class="phase-body" id="p4">
+      <div class="lanes">
+        <div class="lane">
+          <div class="lane-title">Registration journey</div>
+          <div class="lane-item">Full onboarding form: name, DOB, address, tax, account</div>
+          <div class="lane-item">Review loop (editable, up to 30 iterations)</div>
+          <div class="lane-item">SF_CREATE_PARTY with all collected data</div>
+          <div class="lane-item ok">Adds device to group ee356f85 on completion</div>
+          <div class="lane-item ok">Token enriched with partyId</div>
+        </div>
+        <div class="lane">
+          <div class="lane-title">Servicing actions</div>
+          <div class="lane-item">CompleteIdv → sets completedIDV=true in custom_data</div>
+          <div class="lane-item">submit-application → applicationSubmitted=true, clears sensitive data fields</div>
+          <div class="lane-item">store-applicationID → saves applicationID to custom_data</div>
+          <div class="lane-item">update-phone → re-verifies new number via OTP, updates custom_data, sends NA104</div>
+          <div class="lane-item">resend-email-verification → re-triggers email verification flow</div>
+          <div class="lane-item">Registration-biometrics → registers biometrics post-login (session validate, no new token)</div>
+        </div>
+        <div class="lane">
+          <div class="lane-title">State written to custom_data</div>
+          <div class="lane-item ok">partyId (permanent)</div>
+          <div class="lane-item ok">applicationSubmitted (bool)</div>
+          <div class="lane-item ok">completedIDV (bool)</div>
+          <div class="lane-item ok">emailVerified (bool)</div>
+          <div class="lane-item ok">marketingPreferenceSubmitted (bool)</div>
+          <div class="lane-item warn">firstName, lastName refreshed from SF on each login</div>
+          <div class="lane-item warn">Sensitive fields (address, tax, DOB) nulled after submit</div>
+        </div>
+      </div>
+      <div style="margin-top:10px; background:#0d1020; border-radius:8px; padding:10px; font-size:11px; color:#8a8fa8; line-height:1.6;">
+        <strong style="color:#fff;">Data lifecycle:</strong> Sensitive PII (address, tax list, DOB, sort code, account number) is collected during Registration, stored in custom_data, submitted to SF, then <em>explicitly nulled</em> by submit-application. This is deliberate - Monument treats FlexID as a transit layer, not a PII store. SF is the system of record.
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 5 -->
+  <div class="phase ph-ms">
+    <div class="phase-header" onclick="toggle('p5')">
+      <div class="ph-icon">💳</div>
+      <div class="ph-text">
+        <div class="ph-title" style="color:#4dd0e1;">Phase 5 - add-new-device (Ongoing)</div>
+        <div class="ph-sub">Recurring. Any time user gets a new phone. Journey: add-new-device (3 versions)</div>
+      </div>
+      <span class="ph-tag" style="background:#0d1818; color:#4dd0e1; border:1px solid #1a3030;">LIFECYCLE</span>
+      <span class="arrow" id="p5-arrow">▶</span>
+    </div>
+    <div class="phase-body" id="p5">
+      <div class="lanes">
+        <div class="lane">
+          <div class="lane-title">Version 1 (default - disabled)</div>
+          <div class="lane-item risk">State: DISABLED</div>
+          <div class="lane-item">Registers biometrics first, then adds to device group</div>
+          <div class="lane-item">Fetches partyDetails + memorableWordState from SF</div>
+          <div class="lane-item">Sends NA103 (new device notification)</div>
+        </div>
+        <div class="lane">
+          <div class="lane-title">Version 2 (without biometrics)</div>
+          <div class="lane-item ok">State: ACTIVE</div>
+          <div class="lane-item warn">Filter: 6 specific Samsung/TCL device models only</div>
+          <div class="lane-item">Skips biometric registration entirely</div>
+          <div class="lane-item">Direct to device group add → SF data fetch → userData JSON</div>
+          <div class="lane-item warn">Hardcoded workaround for hardware incompatibility</div>
+        </div>
+        <div class="lane">
+          <div class="lane-title">Version 3 (v7 standard)</div>
+          <div class="lane-item ok">State: ACTIVE (all other devices)</div>
+          <div class="lane-item">Registers biometrics (with cancel escape)</div>
+          <div class="lane-item">Adds to device group</div>
+          <div class="lane-item">Fetches SF data, builds full userData JSON</div>
+          <div class="lane-item">Conditionally includes registrationData if applicationSubmitted=false</div>
+          <div class="lane-item ok">Sends NA103 notification</div>
+        </div>
+      </div>
+      <div style="margin-top:10px; background:#0d1020; border-radius:8px; padding:10px; font-size:11px; color:#ffcc00; line-height:1.6;">
+        <strong style="color:#fff;">⚠️ Hardcoded device model list:</strong> The 6-model exclusion list (samsung/SM-G955F, SM-J330FN, SM-A105FN, Teclast/P80X_EEA, SM-A260F, TCL/5031G) is a maintenance liability. Every new incompatible device requires a journey deployment. This should be externalised to a config or device-group lookup.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- DEPENDENCIES -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="scene" id="deps">
+  <p style="color:#555; font-size:11px; margin-bottom:10px;">Every external system this journey touches - and what breaks if it goes down.</p>
+  <div class="dep-grid">
+    <div class="dep-card">
+      <div class="dc-title">☁️ <span class="c-blue">Salesforce (SF)</span></div>
+      <div class="dc-row">SF_Get_party_id → email dedup check (acquisition + bind)</div>
+      <div class="dc-row">SF_Get_party_details → phone for OTP, name, flags (login, bind, forgotten pin)</div>
+      <div class="dc-row">SF_CREATE_PARTY → Registration final step</div>
+      <div class="dc-row">SF_CREATE_MEMBERSHIP_PARTY → Membership acquisition</div>
+      <div class="dc-row">SF_Memorable_Word_State_Check → login + add-new-device</div>
+      <div class="dc-row">SF_Get_Memorable_Word_Hint → memorable word auth</div>
+      <div class="dc-row critical">SF outage = Registration blocked, Login degraded (token has no partyId), Forgotten PIN broken</div>
+    </div>
+    <div class="dep-card">
+      <div class="dc-title">🤖 <span class="c-red">RiskID</span></div>
+      <div class="dc-row">Called via get_riskid_recommendation_userless(actionToken)</div>
+      <div class="dc-row">Used in: bind, CreateAccountDuplicatedEmail, emailExists, otpVerifyPhone, createMSParty</div>
+      <div class="dc-row">Returns: recommendation.type = ALLOW | DENY | (other → treated as ALLOW)</div>
+      <div class="dc-row">Service unavailable (catch) → returns synthetic DENY response</div>
+      <div class="dc-row critical">RiskID outage = entire acquisition flow blocked (fail-closed). Intentional design choice.</div>
+      <div class="dc-row">Logged to custom_activity_log: riskId_service_success / error / unavailable</div>
+    </div>
+    <div class="dep-card">
+      <div class="dc-title">📧 <span class="c-purple">Notification Service</span></div>
+      <div class="dc-row">secure_notifications(code, params) → wraps all outbound comms</div>
+      <div class="dc-row">NA103 = new device registered notification</div>
+      <div class="dc-row">NA104 = phone number updated notification</div>
+      <div class="dc-row">NA106 = email verification (send_verification_email in membership flow)</div>
+      <div class="dc-row">NA107 = forgotten PIN reset notification</div>
+      <div class="dc-row critical">Notification failure is NOT blocking - flows proceed regardless. Silent failure risk.</div>
+    </div>
+    <div class="dep-card">
+      <div class="dc-title">📱 <span class="c-green">SMS / OTP Provider</span></div>
+      <div class="dc-row">Provider: otp-internal-hotp</div>
+      <div class="dc-row">Sender IDs: "monument" (prod), "monumentQA" (test/v7), "monumentPreProd" (membership flows)</div>
+      <div class="dc-row">6-digit code, 120-second expiry, wrong-inputs-only failure counting</div>
+      <div class="dc-row critical">3 different sender IDs across versions = potential user confusion on SMS origin</div>
+      <div class="dc-row">Phone number constructed as: mobileCountryCode + slice(mobileWithoutCode, 1, 10)</div>
+    </div>
+    <div class="dep-card">
+      <div class="dc-title">🔒 <span class="c-yellow">Device Group (ee356f85)</span></div>
+      <div class="dc-row">Single device group: "idvcheckpartyId-devicegroup"</div>
+      <div class="dc-row">Added on: Registration completion, add-new-device</div>
+      <div class="dc-row">Checked on: Login (devicesInDeviceGroup custom function)</div>
+      <div class="dc-row">Acts as the "trusted device" gate - login falls back to Registration if device not in group AND partyId null</div>
+      <div class="dc-row critical">Single device group for all users = no segmentation by product, risk tier, or geography</div>
+    </div>
+    <div class="dep-card">
+      <div class="dc-title">🧮 <span class="c-orange">Custom Functions</span></div>
+      <div class="dc-row">Is_OS_Android() / Is_OS_iOS() → OS detection for version routing</div>
+      <div class="dc-row">devicesInDeviceGroup() → login device check</div>
+      <div class="dc-row">GenerateJWTWithPartyId() → membership flows, signs partyId into JWT</div>
+      <div class="dc-row critical">These are opaque - failure behaviour unknown from config alone</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- VERSION STRATEGY -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="scene" id="versions">
+  <p style="color:#555; font-size:11px; margin-bottom:10px;">Monument uses FlexID's version + filter_criteria pattern as a feature flag system. Here's the full picture.</p>
+  <table class="ver-table">
+    <tr>
+      <th>Journey</th>
+      <th>Version ID</th>
+      <th>Status</th>
+      <th>Gate (filter_criteria)</th>
+      <th>What changed</th>
+    </tr>
+    <tr>
+      <td>default_bind</td>
+      <td>default_bind_version</td>
+      <td><span class="vtag v-active">ACTIVE</span></td>
+      <td>No nextRelease + no RiskID param</td>
+      <td>Original flow. Baseline.</td>
+    </tr>
+    <tr>
+      <td>default_bind</td>
+      <td>default_bind_version_v7</td>
+      <td><span class="vtag v-active">ACTIVE</span></td>
+      <td>nextRelease = "v7.0" + no RiskID</td>
+      <td>fromRegistration check uses params &gt; 1 (was &gt; 0). Passes nextRelease downstream to add-new-device.</td>
+    </tr>
+    <tr>
+      <td>default_bind</td>
+      <td>bindviapinandpartydetails</td>
+      <td><span class="vtag v-active">ACTIVE</span></td>
+      <td>bindViaPinAndPartyDetails param present</td>
+      <td>v8 MSR path. Skips jailbreak check, SF lookup, device approval. Just PIN + custom_data write. Fastest possible bind.</td>
+    </tr>
+    <tr>
+      <td>default_bind</td>
+      <td>bind_withriskid</td>
+      <td><span class="vtag v-active">ACTIVE</span></td>
+      <td>RiskID param present + iOS or Android</td>
+      <td>Adds RiskID recommendation check before all bind logic. fromRegistration uses params &gt; 3.</td>
+    </tr>
+    <tr>
+      <td>Login</td>
+      <td>v3</td>
+      <td><span class="vtag v-disabled">DISABLED</span></td>
+      <td>-</td>
+      <td>Old version. Checked memorable word from SF. Now replaced by login_lite.</td>
+    </tr>
+    <tr>
+      <td>Login</td>
+      <td>login_lite</td>
+      <td><span class="vtag v-active">ACTIVE</span></td>
+      <td>true (catches all)</td>
+      <td>Hardcodes memorableWordSet: true in userData JSON. Removes SF memorable word check from journey. App decides what to do with the flag.</td>
+    </tr>
+    <tr>
+      <td>add-new-device</td>
+      <td>default_version</td>
+      <td><span class="vtag v-disabled">DISABLED</span></td>
+      <td>-</td>
+      <td>Original. Had biometric registration before device group add.</td>
+    </tr>
+    <tr>
+      <td>add-new-device</td>
+      <td>add-new-device_v7_without_biometrics</td>
+      <td><span class="vtag v-warn">ACTIVE (6 devices)</span></td>
+      <td>Device model in hardcoded list of 6</td>
+      <td>Skips biometric registration. Hardware workaround.</td>
+    </tr>
+    <tr>
+      <td>add-new-device</td>
+      <td>add-new-device_v7</td>
+      <td><span class="vtag v-active">ACTIVE (all others)</span></td>
+      <td>Device model NOT in list of 6</td>
+      <td>Standard v7 flow with biometrics.</td>
+    </tr>
+    <tr>
+      <td>CreateAccountDuplicatedEmail</td>
+      <td>default_version</td>
+      <td><span class="vtag v-disabled">DISABLED</span></td>
+      <td>-</td>
+      <td>No RiskID check.</td>
+    </tr>
+    <tr>
+      <td>CreateAccountDuplicatedEmail</td>
+      <td>createaccountduplicatedemail_withriskid</td>
+      <td><span class="vtag v-active">ACTIVE</span></td>
+      <td>iOS or Android</td>
+      <td>Adds RiskID check. Note: jailbreak condition evaluates "false" - jailbreak block is effectively dead code here.</td>
+    </tr>
+    <tr>
+      <td>emailExists</td>
+      <td>emailexists_withoutriskid_withcsm</td>
+      <td><span class="vtag v-disabled">DISABLED</span></td>
+      <td>-</td>
+      <td>Old flow without RiskID.</td>
+    </tr>
+    <tr>
+      <td>emailExists</td>
+      <td>emailexists_withriskid_withcsm</td>
+      <td><span class="vtag v-active">ACTIVE</span></td>
+      <td>iOS or Android</td>
+      <td>RiskID gated. Creates CSM for downstream steps.</td>
+    </tr>
+    <tr>
+      <td>createMSParty</td>
+      <td>createmsparty_withoutriskid_withcsm</td>
+      <td><span class="vtag v-disabled">DISABLED</span></td>
+      <td>-</td>
+      <td>Had debug information screen. Removed.</td>
+    </tr>
+    <tr>
+      <td>createMSParty</td>
+      <td>createmsparty_withriskid_withcsm</td>
+      <td><span class="vtag v-active">ACTIVE</span></td>
+      <td>iOS or Android</td>
+      <td>RiskID gated. Validates CSM before party creation.</td>
+    </tr>
+    <tr>
+      <td>otpVerifyPhone</td>
+      <td>otpverifyphone_withoutriskid_withcsm</td>
+      <td><span class="vtag v-disabled">DISABLED</span></td>
+      <td>-</td>
+      <td>Had debug info screen. Removed.</td>
+    </tr>
+    <tr>
+      <td>otpVerifyPhone</td>
+      <td>otpverifyphone_withriskid_withcsm</td>
+      <td><span class="vtag v-active">ACTIVE</span></td>
+      <td>iOS or Android</td>
+      <td>Full RiskID + CSM chain.</td>
+    </tr>
+  </table>
+
+  <div style="margin-top:12px; background:#0d1020; border-radius:10px; padding:12px; font-size:11px; color:#8a8fa8; line-height:1.6;">
+    <strong style="color:#fff;">Pattern observation:</strong> Monument's versioning strategy is <em>additive</em> - old versions are disabled rather than deleted. This is good for rollback but creates config bloat over time. The filter_criteria expressions are the real feature flags - controlled entirely by what params the mobile app sends. <span style="color:#ffcc00;">This means the app and journey config must be kept in sync manually - there's no contract enforcement between them.</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- RISK MAP -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="scene" id="risks">
+  <p style="color:#555; font-size:11px; margin-bottom:12px;">Assessed risks by category. Impact = blast radius if this breaks. Likelihood = based on config patterns observed.</p>
+
+  <div class="risk-matrix">
+    <div style="font-size:10px; color:#555; font-weight:700; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">Impact × Likelihood</div>
+    <div class="risk-row"><div class="risk-label">SF single point of failure</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:95%; background:#ff4444;">CRITICAL - blocks Registration + Login token enrichment</div></div><div class="risk-tag" style="color:#ff4444;">CRITICAL</div></div>
+    <div class="risk-row"><div class="risk-label">RiskID fail-closed design</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:80%; background:#ff7043;">Outage = acquisition blocked for all new users</div></div><div class="risk-tag" style="color:#ff7043;">HIGH</div></div>
+    <div class="risk-row"><div class="risk-label">login_lite memorableWordSet bug</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:75%; background:#ff9800;">Always returns true - app may skip real check</div></div><div class="risk-tag" style="color:#ff9800;">HIGH</div></div>
+    <div class="risk-row"><div class="risk-label">Hardcoded device model list</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:60%; background:#ffcc00; color:#000;">New incompatible device = journey deployment needed</div></div><div class="risk-tag" style="color:#ffcc00;">MEDIUM</div></div>
+    <div class="risk-row"><div class="risk-label">3 different SMS sender IDs</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:55%; background:#ffcc00; color:#000;">User confusion, phishing surface, QA env leakage</div></div><div class="risk-tag" style="color:#ffcc00;">MEDIUM</div></div>
+    <div class="risk-row"><div class="risk-label">Silent notification failure</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:50%; background:#ffcc00; color:#000;">NA103/104/107 failures not blocking - user unaware</div></div><div class="risk-tag" style="color:#ffcc00;">MEDIUM</div></div>
+    <div class="risk-row"><div class="risk-label">App/journey param contract</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:65%; background:#ff9800;">No enforcement - wrong params = wrong version fires</div></div><div class="risk-tag" style="color:#ff9800;">HIGH</div></div>
+    <div class="risk-row"><div class="risk-label">Dead code in bind_withriskid</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:30%; background:#4caf50;">Jailbreak condition evaluates false - never fires</div></div><div class="risk-tag" style="color:#4caf50;">LOW</div></div>
+    <div class="risk-row"><div class="risk-label">Single device group (no segmentation)</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:40%; background:#8bc34a; color:#000;">Limits risk-tiered access control options</div></div><div class="risk-tag" style="color:#8bc34a;">LOW</div></div>
+    <div class="risk-row"><div class="risk-label">Disabled versions not cleaned up</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:25%; background:#4caf50;">Config bloat - audit risk, not operational risk</div></div><div class="risk-tag" style="color:#4caf50;">LOW</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- IMPLICATIONS -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="scene" id="impl">
+  <p style="color:#555; font-size:11px; margin-bottom:10px;">What this config tells us about Monument's product and engineering decisions - and what to watch.</p>
+  <div class="impl-grid">
+    <div class="impl-card" style="border-color:#2d4ef5;">
+      <div class="ic-title c-blue">🏗 Architecture</div>
+      <div class="ic-item" style="color:#64b5f6;">FlexID is a transit + auth layer only. SF owns all PII. Token = partyId handle.</div>
+      <div class="ic-item" style="color:#64b5f6;">CSM pattern (cross-session messages) is elegant for chaining anonymous flows securely without sessions.</div>
+      <div class="ic-item" style="color:#64b5f6;">Mobile app drives version selection via params - journey config is passive. Tight coupling.</div>
+      <div class="ic-item" style="color:#64b5f6;">Procedures (reusable sub-flows) used well: riskIdCheck, memorable_word, validate_mobile, dob_journey etc.</div>
+    </div>
+    <div class="impl-card" style="border-color:#ff9800;">
+      <div class="ic-title c-orange">⚠️ Technical Debt</div>
+      <div class="ic-item" style="color:#ffb74d;">Hardcoded device models - needs externalisation to config or dynamic lookup.</div>
+      <div class="ic-item" style="color:#ffb74d;">login_lite always returns memorableWordSet=true - creates false state. Should either enforce or remove.</div>
+      <div class="ic-item" style="color:#ffb74d;">Dead code: jailbreak block in bind_withriskid evaluates "false == true" - never fires.</div>
+      <div class="ic-item" style="color:#ffb74d;">3 SMS sender IDs across versions suggests QA config bleeding into production paths.</div>
+      <div class="ic-item" style="color:#ffb74d;">Disabled versions accumulating - no cleanup cadence visible.</div>
+    </div>
+    <div class="impl-card" style="border-color:#3ddc84;">
+      <div class="ic-title c-green">✅ What's done well</div>
+      <div class="ic-item" style="color:#3ddc84;">RiskID integration is thorough - covers acquisition, bind, membership flows. Fail-closed is the right call for a bank.</div>
+      <div class="ic-item" style="color:#3ddc84;">CSM chaining prevents step-skipping attacks cleanly.</div>
+      <div class="ic-item" style="color:#3ddc84;">PII cleared after submission (nulled in submit-application) - minimal data retention in FlexID.</div>
+      <div class="ic-item" style="color:#3ddc84;">Lockout rules are granular and per-authenticator - not a blunt instrument.</div>
+      <div class="ic-item" style="color:#3ddc84;">Biometric fallback to PIN with threshold (5 failures) is well thought out.</div>
+    </div>
+    <div class="impl-card" style="border-color:#ce93d8;">
+      <div class="ic-title c-purple">🛣 Product Observations</div>
+      <div class="ic-item" style="color:#ce93d8;">Two distinct onboarding funnels: Banking app (device-first) vs Membership savings (web/anonymous-first). Different trust models.</div>
+      <div class="ic-item" style="color:#ce93d8;">v7.0 / v8 versioning in params suggests aligned mobile app release cadence with journey config.</div>
+      <div class="ic-item" style="color:#ce93d8;">Memorable word is a UK banking compliance artefact (FCA guidance on step-up auth). Its "always true" state in login_lite suggests it's being soft-deprecated.</div>
+      <div class="ic-item" style="color:#ce93d8;">Recovery journey (policy_id: Recovery) exists but is disabled - account recovery not yet live or handled differently.</div>
+    </div>
+    <div class="impl-card" style="border-color:#ff4444;">
+      <div class="ic-title c-red">🚨 Immediate Actions</div>
+      <div class="ic-item" style="color:#ff6b6b;">Fix login_lite: either restore SF memorable word check or remove the field from userData to stop misleading the app.</div>
+      <div class="ic-item" style="color:#ff6b6b;">Fix dead jailbreak code in bind_withriskid (condition evaluates "false").</div>
+      <div class="ic-item" style="color:#ff6b6b;">Externalise device model exclusion list from journey config.</div>
+      <div class="ic-item" style="color:#ff6b6b;">Align SMS sender IDs - "monumentQA" should not appear in production-routed versions.</div>
+      <div class="ic-item" style="color:#ff6b6b;">Document the app/journey param contract formally to prevent version misrouting.</div>
+    </div>
+    <div class="impl-card" style="border-color:#4dd0e1;">
+      <div class="ic-title" style="color:#4dd0e1;">🔭 Future Considerations</div>
+      <div class="ic-item" style="color:#80deea;">Recovery journey needs to be activated or explicitly decommissioned.</div>
+      <div class="ic-item" style="color:#80deea;">Device group segmentation (risk tier, product type) would enable more granular access policy.</div>
+      <div class="ic-item" style="color:#80deea;">SF as single dependency is a resilience risk - consider caching partyId/flags in FlexID custom_data with TTL.</div>
+      <div class="ic-item" style="color:#80deea;">Notification failure handling - at minimum log + alert; ideally retry or user-facing feedback.</div>
+      <div class="ic-item" style="color:#80deea;">Version cleanup cadence needed - disabled versions should be archived after 2 release cycles.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function show(id, el) {
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+function toggle(id) {
+  const body = document.getElementById(id);
+  const arrow = document.getElementById(id + '-arrow');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  arrow.classList.toggle('open', !isOpen);
+  arrow.textContent = isOpen ? '▶' : '▼';
+}
+</script>
+</body>
+</html>

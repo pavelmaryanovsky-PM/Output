@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #fff; padding: 20px; }
+h1 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.sub { font-size: 11px; color: #666; margin-bottom: 18px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+.tab { padding: 7px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1.5px solid #2a2f45; background: #1a1e2e; color: #888; transition: all 0.15s; }
+.tab.active { background: #3d5af1; border-color: #3d5af1; color: #fff; }
+.scene { display: none; }
+.scene.active { display: block; }
+
+/* flow steps */
+.flow { display: flex; flex-direction: column; }
+.step { display: flex; gap: 14px; position: relative; padding-bottom: 22px; }
+.step:not(:last-child) .vline { position: absolute; left: 18px; top: 40px; width: 2px; height: calc(100% - 18px); background: #1e2235; }
+.ico { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; z-index: 1; }
+.body { flex: 1; }
+.slabel { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.sdesc { font-size: 11px; color: #8a8fa8; line-height: 1.55; }
+.badge { display: inline-block; margin-top: 5px; padding: 2px 9px; border-radius: 8px; font-size: 10px; font-weight: 700; }
+.bg { background: #0b2a18; color: #3ddc84; border: 1px solid #1a5030; }
+.by { background: #2a1e00; color: #ffcc00; border: 1px solid #5a4200; }
+.bb { background: #0b1830; color: #64b5f6; border: 1px solid #1a3870; }
+.br { background: #2a0b0b; color: #ff5252; border: 1px solid #5a1a1a; }
+
+/* cards */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.card { background: #1a1e2e; border: 1px solid #252a40; border-radius: 10px; padding: 12px; }
+.card .ct { font-size: 12px; font-weight: 700; margin-bottom: 5px; }
+.card .cd { font-size: 11px; color: #8a8fa8; line-height: 1.5; }
+
+/* methods */
+.methods { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.mth { background: #1a1e2e; border: 1px solid #252a40; border-radius: 10px; padding: 12px 8px; flex: 1; min-width: 80px; text-align: center; }
+.mth .mi { font-size: 22px; margin-bottom: 4px; }
+.mth .ml { font-size: 11px; font-weight: 600; }
+.mth .ms { font-size: 10px; color: #666; }
+
+/* scenarios */
+.scs { display: flex; flex-direction: column; gap: 8px; }
+.sc { background: #1a1e2e; border-radius: 10px; padding: 12px 14px; border-left: 3px solid; }
+.sc .sl { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+.sc .sd { font-size: 11px; color: #8a8fa8; line-height: 1.5; }
+
+/* chain */
+.chain { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin: 12px 0; }
+.cs { background: #1a1e2e; border: 1px solid #252a40; border-radius: 8px; padding: 6px 12px; font-size: 11px; font-weight: 600; color: #ccc; }
+.ca { color: #3d5af1; font-size: 14px; padding: 0 2px; }
+
+.hbox { background: #0b1830; border: 1px solid #1a3060; border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 11px; color: #8ab4f8; line-height: 1.6; }
+.hbox strong { color: #fff; }
+
+.ico-b { background: #0f1f5c; }
+.ico-g { background: #0b2a18; }
+.ico-p { background: #1f0f5c; }
+.ico-o { background: #3a1800; }
+.ico-t { background: #0b2a2a; }
+.ico-r { background: #2a0b0b; }
+</style>
+</head>
+<body>
+<h1>🏦 Monument Bank - How Your App Works</h1>
+<p class="sub">Your AI journey guide - tap any tab to explore</p>
+
+<div class="tabs">
+  <div class="tab active" onclick="show('reg', this)">📝 Signing Up</div>
+  <div class="tab" onclick="show('login', this)">🔓 Logging In</div>
+  <div class="tab" onclick="show('sec', this)">🛡️ Security</div>
+  <div class="tab" onclick="show('ms', this)">💳 Savings Account</div>
+</div>
+
+<!-- SIGNING UP -->
+<div class="scene active" id="reg">
+  <div class="flow">
+    <div class="step">
+      <div class="vline"></div>
+      <div class="ico ico-b">📧</div>
+      <div class="body">
+        <div class="slabel">Enter your email</div>
+        <div class="sdesc">We check if you already have an account. Already a customer? We redirect you to login instead.</div>
+        <span class="badge bb">Duplicate account check</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="vline"></div>
+      <div class="ico ico-p">👤</div>
+      <div class="body">
+        <div class="slabel">Tell us who you are</div>
+        <div class="sdesc">First name, middle name (optional), last name, date of birth, nationality. Everything is saved so you can edit any field later from the review screen.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="vline"></div>
+      <div class="ico ico-t">📍</div>
+      <div class="body">
+        <div class="slabel">Your home address</div>
+        <div class="sdesc">Search by postcode or type it manually. Android and iPhone look slightly different here but do the exact same thing.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="vline"></div>
+      <div class="ico ico-o">💸</div>
+      <div class="body">
+        <div class="slabel">Tax status + bank account</div>
+        <div class="sdesc">Declare where you pay tax (UK, overseas, or US - each has its own screen). Add your existing bank sort code and account number so Monument can move your money.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="vline"></div>
+      <div class="ico ico-b">📋</div>
+      <div class="body">
+        <div class="slabel">Review and confirm</div>
+        <div class="sdesc">See everything at once. Tap any section - name, address, phone, tax, account - to go back and edit. The app loops here until you're happy and confirm.</div>
+        <span class="badge by">Any field is editable</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="vline"></div>
+      <div class="ico ico-g">🔐</div>
+      <div class="body">
+        <div class="slabel">Create your PIN + set up biometrics</div>
+        <div class="sdesc">Choose a 6-digit PIN. Then set up Face ID, fingerprint or device unlock. Your phone is now cryptographically linked to your account.</div>
+        <span class="badge bg">Device registered ✓</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="ico ico-t">✉️</div>
+      <div class="body">
+        <div class="slabel">Verify your email</div>
+        <div class="sdesc">A link is sent to your inbox. You can resend it anytime from inside the app. Once clicked, you're fully set up.</div>
+        <span class="badge bg">You're in ✓</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div class="scene" id="login">
+  <div class="slabel" style="font-size:13px; margin-bottom:12px;">Every time you open Monument</div>
+  <div class="methods">
+    <div class="mth"><div class="mi">👤</div><div class="ml">Face ID</div><div class="ms">Fastest</div></div>
+    <div class="mth"><div class="mi">☝️</div><div class="ml">Fingerprint</div><div class="ms">Fastest</div></div>
+    <div class="mth"><div class="mi">🔢</div><div class="ml">PIN</div><div class="ms">Fallback</div></div>
+  </div>
+
+  <div class="slabel" style="font-size:12px; margin-bottom:8px;">Three scenarios you might hit</div>
+  <div class="scs">
+    <div class="sc" style="border-color:#3ddc84;">
+      <div class="sl" style="color:#3ddc84;">✅ Normal login - returning device</div>
+      <div class="sd">Your device is recognised → biometrics or PIN → we fetch your latest account data in the background → straight into the app. Takes seconds.</div>
+    </div>
+    <div class="sc" style="border-color:#ffcc00;">
+      <div class="sl" style="color:#ffcc00;">📱 New device</div>
+      <div class="sd">Your old phone gets a push notification asking "was this you?" → approve it → new phone asks you to set PIN + biometrics → you're in on the new device too.</div>
+    </div>
+    <div class="sc" style="border-color:#ff5252;">
+      <div class="sl" style="color:#ff5252;">🔑 Forgotten PIN</div>
+      <div class="sd">Tap "Forgotten PIN" → SMS code sent to your registered number → 2 minutes to enter it → reset your PIN → back in immediately.</div>
+    </div>
+  </div>
+
+  <div class="hbox">
+    <strong>Lockout rules:</strong> 5 wrong PINs in 30 min → 30-min lockout. 5 wrong OTPs → 60-min lockout. 3 wrong memorable word attempts → 1-min lockout. Face ID / fingerprint can unlock a PIN lockout caused by biometric failures.
+  </div>
+</div>
+
+<!-- SECURITY -->
+<div class="scene" id="sec">
+  <p style="font-size:11px; color:#666; margin-bottom:14px;">These all run silently. You only see something if a check fails.</p>
+  <div class="grid">
+    <div class="card">
+      <div class="ct">🔍 Jailbreak / Root check</div>
+      <div class="cd">Runs on every app open. Jailbroken iPhone or rooted Android? Hard block. "Access not allowed on modified devices." No way around it.</div>
+    </div>
+    <div class="card">
+      <div class="ct">🤖 Fraud scoring (RiskID)</div>
+      <div class="cd">Silent AI risk check before every sensitive action. Returns ALLOW or DENY. DENY stops the flow immediately, no explanation given to the user.</div>
+    </div>
+    <div class="card">
+      <div class="ct">📱 Device binding</div>
+      <div class="cd">Your phone is cryptographically paired to your account. A stranger with your password on a new device still can't log in without approving on your trusted phone.</div>
+    </div>
+    <div class="card">
+      <div class="ct">🔗 Secure step tokens</div>
+      <div class="cd">When you move between steps in a flow, we use encrypted short-lived tokens (15 min expiry). Nothing sensitive sits in a URL or gets passed in plain text.</div>
+    </div>
+    <div class="card">
+      <div class="ct">📞 SMS OTP</div>
+      <div class="cd">6 digits, expires in 2 minutes. Only wrong attempts count against your limit - accidentally tapping the wrong digit and correcting it doesn't penalise you.</div>
+    </div>
+    <div class="card">
+      <div class="ct">🧠 Memorable word</div>
+      <div class="cd">An optional extra layer with a hint shown to jog your memory. Used in high-risk account recovery. 3 failures triggers a temporary lockout.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MEMBERSHIP / SAVINGS -->
+<div class="scene" id="ms">
+  <p style="font-size:11px; color:#666; margin-bottom:12px;">Opening a Monument savings account is a separate flow - no existing app login needed. Five steps, each verified before the next unlocks.</p>
+
+  <div class="slabel" style="font-size:12px; margin-bottom:8px;">The secure 5-step chain</div>
+  <div class="chain">
+    <div class="cs">📧 Email check</div>
+    <div class="ca">→</div>
+    <div class="cs">📱 SMS verify</div>
+    <div class="ca">→</div>
+    <div class="cs">🤖 Risk check</div>
+    <div class="ca">→</div>
+    <div class="cs">🏦 Create account</div>
+    <div class="ca">→</div>
+    <div class="cs">✉️ Email verify</div>
+  </div>
+
+  <div class="scs">
+    <div class="sc" style="border-color:#3d5af1;">
+      <div class="sl" style="color:#3d5af1;">1 - Email check</div>
+      <div class="sd">Already a Monument customer with this email? Shown an information screen and stopped - no duplicate accounts. If new, a secure token is created to carry your email safely to step 2.</div>
+    </div>
+    <div class="sc" style="border-color:#3d5af1;">
+      <div class="sl" style="color:#3d5af1;">2 - Phone verification</div>
+      <div class="sd">6-digit SMS code to your mobile. Proves you own the number. The step-1 token is consumed and a new one is issued - now carrying your verified email AND verified phone together.</div>
+    </div>
+    <div class="sc" style="border-color:#ffcc00;">
+      <div class="sl" style="color:#ffcc00;">3 - Risk assessment</div>
+      <div class="sd">Silent fraud check. DENY = application is stopped here. ALLOW = you move to account creation. You don't see this step at all if everything is fine.</div>
+    </div>
+    <div class="sc" style="border-color:#3ddc84;">
+      <div class="sl" style="color:#3ddc84;">4 - Account created</div>
+      <div class="sd">Your record is created in Monument's systems. You receive a unique partyId - your permanent identity across everything at Monument. A signed token is returned to the app to confirm success.</div>
+    </div>
+    <div class="sc" style="border-color:#3ddc84;">
+      <div class="sl" style="color:#3ddc84;">5 - Email verification</div>
+      <div class="sd">Verification email sent. Your identity verification flag is marked complete. You're now a full Monument member with an active savings account.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function show(id, el) {
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
