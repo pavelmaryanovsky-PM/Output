@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PNC Financial - PCR Requirements Briefing</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #f9f8f6; color: #1a1a18; line-height: 1.7; font-size: 16px; }
+  .container { max-width: 860px; margin: 0 auto; padding: 2.5rem 2rem; }
+  .page-header { margin-bottom: 2.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid #e0ddd6; }
+  .page-header h1 { font-size: 22px; font-weight: 500; color: #1a1a18; margin-bottom: 4px; }
+  .page-header p { font-size: 14px; color: #6b6b67; }
+  .meta { display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
+  .meta span { font-size: 12px; color: #888780; }
+  .topic { margin-bottom: 2.5rem; }
+  .topic-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid #e0ddd6; }
+  .topic-icon { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .topic-title { font-size: 18px; font-weight: 500; color: #1a1a18; }
+  .topic-sub { font-size: 13px; color: #6b6b67; margin-top: 2px; }
+  .pcr-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .pcr-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 6px; border: 1px solid; text-decoration: none; }
+  .pill-blue { background: #E6F1FB; color: #0C447C; border-color: #85B7EB; }
+  .pill-amber { background: #FAEEDA; color: #633806; border-color: #EF9F27; }
+  .pill-done { background: #EAF3DE; color: #27500A; border-color: #97C459; }
+  .pill-blocker { background: #FCEBEB; color: #791F1F; border-color: #F09595; }
+  .sections { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .card { background: #ffffff; border: 1px solid #e0ddd6; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-label { font-size: 11px; font-weight: 500; color: #888780; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .card p { font-size: 14px; color: #4a4a47; line-height: 1.7; }
+  .card ul { list-style: none; padding: 0; }
+  .card ul li { font-size: 14px; color: #4a4a47; line-height: 1.7; padding-left: 14px; position: relative; }
+  .card ul li::before { content: "-"; position: absolute; left: 0; color: #b4b2a9; }
+  .full-card { background: #ffffff; border: 1px solid #e0ddd6; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 12px; }
+  .pcr-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+  .pcr-row:last-child { margin-bottom: 0; }
+  .pcr-badge { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 6px; border: 1px solid; white-space: nowrap; flex-shrink: 0; margin-top: 2px; text-decoration: none; }
+  .pcr-desc { font-size: 13px; color: #4a4a47; line-height: 1.6; }
+  .pcr-desc strong { font-weight: 500; color: #1a1a18; }
+  .open-items { background: #FAEEDA; border: 1px solid #EF9F27; border-radius: 12px; padding: 1rem 1.25rem; margin-top: 12px; }
+  .open-items .card-label { color: #854F0B; }
+  .open-items ul li { color: #633806; }
+  .open-items ul li::before { color: #BA7517; }
+  .warn-banner { background: #FCEBEB; border: 1px solid #F09595; border-radius: 10px; padding: 0.75rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #791F1F; font-weight: 500; line-height: 1.5; }
+  .divider { border: none; border-top: 1px solid #e0ddd6; margin: 2.5rem 0; }
+  .req-block { background: #ffffff; border: 1px solid #e0ddd6; border-radius: 12px; padding: 1.25rem; margin-bottom: 12px; }
+  .req-block + .req-block { margin-top: 0; }
+  .req-title { font-size: 15px; font-weight: 500; color: #1a1a18; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .req-id { font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 5px; border: 1px solid; }
+  .req-story { font-size: 13px; color: #4a4a47; font-style: italic; margin-bottom: 14px; padding: 8px 12px; background: #f9f8f6; border-radius: 6px; border-left: 3px solid #D3D1C7; line-height: 1.6; }
+  .req-section-label { font-size: 11px; font-weight: 500; color: #888780; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; margin-top: 12px; }
+  .req-section-label:first-of-type { margin-top: 0; }
+  .req-list { list-style: none; padding: 0; }
+  .req-list li { font-size: 13px; color: #4a4a47; line-height: 1.6; padding-left: 16px; position: relative; margin-bottom: 4px; }
+  .req-list li::before { content: "✓"; position: absolute; left: 0; color: #3B6D11; font-size: 11px; top: 2px; }
+  .req-list.out li::before { content: "✕"; color: #A32D2D; }
+  .req-list.open li::before { content: "?"; color: #854F0B; font-weight: 500; }
+  .section-divider { border: none; border-top: 1px dashed #e0ddd6; margin: 1.25rem 0; }
+  .reqs-header { font-size: 14px; font-weight: 500; color: #1a1a18; margin-bottom: 12px; margin-top: 1.5rem; display: flex; align-items: center; gap: 8px; }
+  .reqs-header::after { content: ""; flex: 1; height: 1px; background: #e0ddd6; }
+  a { color: inherit; }
+  @media (max-width: 600px) { .sections { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <h1>PNC Financial - PCR requirements briefing</h1>
+    <p>Prepared for grooming and effort estimation. Two open workstreams blocking PNC's expansion into commercial and retail banking.</p>
+    <div class="meta">
+      <span>Owner: Pavel Maryanovsky</span>
+      <span>Date: May 18, 2026</span>
+      <span>Status: Pending grooming</span>
+      <span style="color:#27500A; background:#EAF3DE; border:1px solid #97C459; padding:2px 8px; border-radius:5px; font-weight:500;">$3.8M ARR opportunity</span>
+    </div>
+    <div style="margin-top:12px; background:#EAF3DE; border:1px solid #97C459; border-radius:10px; padding:0.75rem 1.25rem; font-size:13px; color:#27500A; line-height:1.6;">
+      PNC is expanding into commercial and retail banking and is willing to invest an additional <strong>$3.8M annually</strong> contingent on delivery of the capabilities described below. Delivery is a direct enabler of this expansion deal.
+    </div>
+  </div>
+
+  <!-- TOPIC 1: STRIKE MANAGEMENT -->
+  <div class="topic">
+    <div class="topic-header">
+      <div class="topic-icon" style="background:#E6F1FB;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7.5 4.5v4.5a9 9 0 01-7.5 8.5A9 9 0 014.5 12V7.5L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
+      </div>
+      <div>
+        <div class="topic-title">Topic 1 - Strike management (FLORIE)</div>
+        <div class="topic-sub">Cross-application failed authentication counting and reset</div>
+      </div>
+    </div>
+
+    <div class="pcr-pills">
+      <a href="https://transmitsecurity.atlassian.net/browse/PCR-739" target="_blank" class="pcr-pill pill-blue">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        PCR-739 - Cross-app counting
+      </a>
+      <a href="https://transmitsecurity.atlassian.net/browse/PCR-925" target="_blank" class="pcr-pill pill-blue">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        PCR-925 - Global reset API
+      </a>
+      <a href="https://transmitsecurity.atlassian.net/browse/PCR-416" target="_blank" class="pcr-pill pill-done">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        PCR-416 - Done (partial)
+      </a>
+      <a href="https://transmitsecurity.atlassian.net/browse/PCR-355" target="_blank" class="pcr-pill pill-done">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        PCR-355 - Done
+      </a>
+    </div>
+
+    <div class="sections">
+      <div class="card">
+        <div class="card-label">Context</div>
+        <ul>
+          <li>FlexID tracks failed logins per-app by default (FLORIE system)</li>
+          <li>"User" scope (cross-app counting) already exists but does not support per-authenticator thresholds</li>
+          <li>"Authenticator across devices" scope supports per-authenticator thresholds but is limited to one app</li>
+          <li>PNC needs both simultaneously - different thresholds AND cross-app counting</li>
+          <li>PNC has frozen new license purchases until resolved</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-label">Problem in one sentence</div>
+        <p style="margin-bottom:12px;">A user can accumulate strikes across PNC's apps without ever triggering a global lockout, and a successful auth on one app leaves strikes intact on all others.</p>
+        <div class="card-label">Commercial impact</div>
+        <ul>
+          <li>Blocking production rollout</li>
+          <li>License expansion frozen until resolved</li>
+          <li>Relationship health described as "very negative" in PCR</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="reqs-header">Product requirements</div>
+
+    <div class="req-block">
+      <div class="req-title">
+        <a href="https://transmitsecurity.atlassian.net/browse/PCR-739" target="_blank" class="req-id pill-blue">PCR-739</a>
+        Cross-app, per-authenticator strike counting
+      </div>
+      <div class="req-story">"As a FlexID administrator, I want to configure failed authentication rules that count strikes per authenticator type across all applications, so that a user's full failure history is enforced regardless of which app they use."</div>
+
+      <div class="req-section-label">Acceptance criteria</div>
+      <ul class="req-list">
+        <li>A new FLORIE counting scope is available: "Authenticator across all applications"</li>
+        <li>When this scope is selected, strike counts for each authenticator type (e.g. password, OTP) accumulate across all apps in the tenant</li>
+        <li>Different thresholds can be configured per authenticator type within this scope (e.g. 3 for password, 4 for OTP)</li>
+        <li>Existing scopes ("User", "Authenticator across devices") are unaffected</li>
+        <li>The new scope is configurable via the admin console FLORIE rule builder</li>
+      </ul>
+
+      <div class="req-section-label" style="margin-top:12px;">Out of scope</div>
+      <ul class="req-list out">
+        <li>Admin console UI changes beyond the new scope option in the rule builder</li>
+        <li>Cross-tenant strike counting</li>
+        <li>Automatic migration of existing FLORIE rules to the new scope</li>
+      </ul>
+    </div>
+
+    <div class="req-block">
+      <div class="req-title">
+        <a href="https://transmitsecurity.atlassian.net/browse/PCR-925" target="_blank" class="req-id pill-blue">PCR-925</a>
+        Global strike reset API
+      </div>
+      <div class="req-story">"As a developer integrating FlexID, I want an API endpoint to reset all strike counts for a user across all applications, so that a successful authentication in one app clears the user's full failure history."</div>
+
+      <div class="req-section-label">Acceptance criteria</div>
+      <ul class="req-list">
+        <li>A new endpoint is available in the FlexID user management API: reset all strike counts for a given user across all applications</li>
+        <li>The endpoint accepts a user identifier and clears all FLORIE strike records for that user tenant-wide</li>
+        <li>The endpoint returns a success/failure response</li>
+        <li>No automatic invocation - the caller (PNC's backend) is responsible for triggering it on a successful auth event</li>
+        <li>The API is documented with explicit guidance that the caller is responsible for ensuring this does not conflict with their own FLORIE rule configurations</li>
+      </ul>
+
+      <div class="req-section-label" style="margin-top:12px;">Out of scope</div>
+      <ul class="req-list out">
+        <li>Admin console UI for triggering resets</li>
+        <li>Automatic reset logic built into FlexID flows</li>
+        <li>Product-side enforcement of cross-app FLORIE policy consistency</li>
+        <li>App-group scoped reset (may be considered in a future iteration)</li>
+      </ul>
+    </div>
+
+    <div class="open-items">
+      <div class="card-label">Open before grooming - confirm with CX</div>
+      <ul class="req-list open" style="color:#633806;">
+        <li>Is PCR-925 the primary ask, superseding PCR-739, or are both required?</li>
+        <li>Should the new counting scope apply tenant-wide or be configurable per FLORIE rule?</li>
+        <li>Is audit logging required when a global reset is triggered?</li>
+        <li>Are these one engineering effort or two separate tickets?</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- TOPIC 2: KAFKA -->
+  <div class="topic">
+    <div class="topic-header">
+      <div class="topic-icon" style="background:#EAF3DE;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v4M8.5 17.5l-2-2M15.5 17.5l2-2M10 11L7 17M14 11l3 6"/></svg>
+      </div>
+      <div>
+        <div class="topic-title">Topic 2 - Kafka event streaming</div>
+        <div class="topic-sub">Payload customization and schema registry support</div>
+      </div>
+    </div>
+
+    <div class="warn-banner">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      PCR-773 had a delivery deadline of end of May 2026 for PNC's Retail Alpha Pilot. Confirm current status with CX before grooming.
+    </div>
+
+    <div class="pcr-pills">
+      <a href="https://transmitsecurity.atlassian.net/browse/PCR-773" target="_blank" class="pcr-pill pill-blocker">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        PCR-773 - Payload customization (Blocker)
+      </a>
+      <a href="https://transmitsecurity.atlassian.net/browse/PCR-865" target="_blank" class="pcr-pill pill-blocker">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        PCR-865 - Schema registry (Blocker)
+      </a>
+      <a href="https://transmitsecurity.atlassian.net/browse/PCR-819" target="_blank" class="pcr-pill pill-amber">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        PCR-819 - Schema registry (Citizens Bank)
+      </a>
+    </div>
+
+    <div class="sections">
+      <div class="card">
+        <div class="card-label">Context</div>
+        <ul>
+          <li>FlexID sends auth events to Kafka via Activity Log and Event Streaming connectors</li>
+          <li>Messages use StringSerializer - fixed schema, no customization</li>
+          <li>PNC's Kafka topics enforce a Schema Registry - FlexID messages fail deserialization</li>
+          <li>PCR-865 (PNC) and PCR-819 (Citizens Bank) describe the same gap independently</li>
+          <li>PCR-865 calls for 773 and 819 to be delivered together</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-label">Problem in one sentence</div>
+        <p style="margin-bottom:12px;">FlexID Kafka messages cannot be consumed by PNC's pipelines because they don't carry the required schema format, and their content cannot be shaped to match downstream system expectations.</p>
+        <div class="card-label">Commercial impact</div>
+        <ul>
+          <li>Blocking development for PNC's Retail rollout</li>
+          <li>Retail Alpha Pilot deadline was end of May 2026</li>
+          <li>Same gap affects Citizens Bank (PCR-819) - broader demand signal</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="reqs-header">Product requirements</div>
+
+    <div class="req-block">
+      <div class="req-title">
+        <a href="https://transmitsecurity.atlassian.net/browse/PCR-773" target="_blank" class="req-id pill-blocker">PCR-773</a>
+        Configurable Kafka event payload
+      </div>
+      <div class="req-story">"As a FlexID administrator, I want to control the content and structure of Kafka messages published by FlexID, so that downstream systems receive events in the shape they expect without requiring external transformation pipelines."</div>
+
+      <div class="req-section-label">Acceptance criteria</div>
+      <ul class="req-list">
+        <li>Administrators can configure which fields are included or excluded from the Kafka message payload</li>
+        <li>Administrators can configure the message key (currently hardcoded to device_session_id)</li>
+        <li>Configuration is available for both Activity Log and Event Streaming Kafka connectors</li>
+        <li>Configuration is managed centrally via the admin console - not per-event scripting</li>
+        <li>Multiple schema versions per topic are supported</li>
+        <li>Existing default behavior (no customization) remains the default - opt-in only</li>
+      </ul>
+
+      <div class="req-section-label" style="margin-top:12px;">Out of scope</div>
+      <ul class="req-list out">
+        <li>Unrestricted custom scripting or code injection into event payloads</li>
+        <li>Real-time event enrichment from external systems at publish time</li>
+        <li>Retroactive transformation of already-published events</li>
+      </ul>
+    </div>
+
+    <div class="req-block">
+      <div class="req-title">
+        <span style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+          <a href="https://transmitsecurity.atlassian.net/browse/PCR-865" target="_blank" class="req-id pill-blocker">PCR-865</a>
+          <a href="https://transmitsecurity.atlassian.net/browse/PCR-819" target="_blank" class="req-id pill-amber">PCR-819</a>
+        </span>
+        Schema Registry support for Kafka connectors
+      </div>
+      <div class="req-story">"As a FlexID administrator, I want to configure a Schema Registry for FlexID's Kafka connectors, so that messages are published in a format that can be consumed by Schema Registry-enforced Kafka topics."</div>
+
+      <div class="req-section-label">Acceptance criteria</div>
+      <ul class="req-list">
+        <li>Kafka connector configuration in the admin console accepts a Schema Registry URL and credentials</li>
+        <li>FlexID supports at minimum KafkaAvroSerializer and KafkaJsonSchemaSerializer as serializer options for message values</li>
+        <li>Messages published with a configured Schema Registry include the correct wire format (Confluent 5-byte magic-byte prefix)</li>
+        <li>Schema Registry configuration is available for both Activity Log and Event Streaming connectors</li>
+        <li>If no Schema Registry is configured, existing StringSerializer behavior is preserved</li>
+      </ul>
+
+      <div class="req-section-label" style="margin-top:12px;">Out of scope</div>
+      <ul class="req-list out">
+        <li>Transmit-hosted or managed Schema Registry - customer provides their own</li>
+        <li>Automatic schema registration or schema evolution management</li>
+        <li>Support for non-Confluent Schema Registry implementations (to be confirmed with R&D)</li>
+      </ul>
+    </div>
+
+    <div class="open-items">
+      <div class="card-label">Open before grooming - confirm with CX and R&D</div>
+      <ul class="req-list open" style="color:#633806;">
+        <li>Does PCR-865 fully subsume PCR-773, or does 773 have requirements not captured in 865?</li>
+        <li>Are 773 and 865 one engineering effort or two separate workstreams?</li>
+        <li>Which connector surfaces are in scope - Activity Log, Event Streaming, or both?</li>
+        <li>Can PCR-819 and PCR-865 be consolidated into a single FLEXID ticket?</li>
+        <li>What is the current status of PNC's Retail Alpha Pilot given the May deadline has passed?</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
