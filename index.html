@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Output Files</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 600px;
+      margin: 60px auto;
+      padding: 0 20px;
+      color: #333;
+    }
+    h1 { font-size: 1.4rem; margin-bottom: 8px; }
+    p { color: #666; font-size: 0.9rem; margin-bottom: 32px; }
+    ul { list-style: none; padding: 0; }
+    li { margin-bottom: 12px; }
+    a {
+      display: block;
+      padding: 14px 18px;
+      background: #f6f8fa;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #0969da;
+      font-size: 0.95rem;
+      transition: background 0.15s;
+    }
+    a:hover { background: #eaf1fb; }
+    .empty { color: #666; font-size: 0.9rem; }
+    .error { color: #cf222e; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>Output Files</h1>
+  <p>All HTML files in this repo - updates automatically.</p>
+  <ul id="file-list"><li class="empty">Loading...</li></ul>
+
+  <script>
+    const OWNER = "pavelmaryanovsky-PM";
+    const REPO = "Output";
+    const BRANCH = "main";
+
+    fetch(`https://api.github.com/repos/${OWNER}/${REPO}/git/trees/${BRANCH}?recursive=1`)
+      .then(r => r.json())
+      .then(data => {
+        const htmlFiles = data.tree
+          .filter(f => f.type === "blob" && f.path.endsWith(".html") && f.path !== "index.html")
+          .sort((a, b) => a.path.localeCompare(b.path));
+
+        const list = document.getElementById("file-list");
+
+        if (htmlFiles.length === 0) {
+          list.innerHTML = '<li class="empty">No HTML files found.</li>';
+          return;
+        }
+
+        list.innerHTML = htmlFiles.map(f =>
+          `<li><a href="${f.path}">${f.path}</a></li>`
+        ).join("");
+      })
+      .catch(() => {
+        document.getElementById("file-list").innerHTML =
+          '<li class="error">Could not load files. Check repo name or try refreshing.</li>';
+      });
+  </script>
+</body>
+</html>
